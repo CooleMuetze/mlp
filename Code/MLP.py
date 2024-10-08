@@ -2,18 +2,16 @@ import numpy as np
 
 class MLP:
 
-    def __init__(self, layers: list, activation: list):
+    def __init__(self, layers: list, activation, activation_derivative):
         """
         Initialize the MLP with the given layers and activation functions
         The length of the layers and activation functions should be the same
         :param list layers: list of integers, where each integer represents the number of neurons in that layer
         :param list activation: list of functions, where each function is the activation function for that layer
-        :raises ValueError: if the length of the layers and activation functions are not the same
         """
-        if len(layers) != len(activation):
-            raise ValueError("The number of layers and activation functions should be the same, because each layer should have an activation function.")
         self.layers = layers
         self.activation = activation
+        self.activation_derivative = activation_derivative
         self.weights = []
         self.biases = []
         self.initialize()
@@ -28,14 +26,22 @@ class MLP:
             weight = np.random.randn(self.layers[i], self.layers[i - 1]) * 0.1
 
             # Initialize the bias for the current layer i with zeros
-            # The bias is a constant value that is added to the activation function to shift the curve. It is initialized to zero because the activation function is centered around zero. 
-            bias = np.zeros(self.layers[i])
+            # The bias is a constant value that is added to the activation function to shift the curve. It is initialized to zero because the activation function is centered around zero.
+            # Use np.reshape to make sure that the bias is a column vector
+            bias = np.reshape(np.zeros(self.layers[i]), (-1, 1))
 
             # Append the weights and biases to the list
+
             self.weights.append(weight)
             self.biases.append(bias)
 
-    def forward_list(self, x: np.ndarray) -> list:
+        
+
+
+    ### Forward pass
+
+
+    def forward(self, x: np.ndarray):
         """
         Forward pass through the MLP
         :param np.ndarray x: input to the MLP
@@ -43,58 +49,79 @@ class MLP:
         """
 
         # Define list of results for each layer. Represents the output of each layer used as input for the next layer. Stored as a list to visualize the flow of data through the network.
-        results = []
+        h_list = []
+        z_list = []
 
         # Define the input as the first result
-        results.append(x)
+        h_list.append(x.reshape(-1, 1))
+        z_list.append(x.reshape(-1, 1))
+
 
         # Loop through each layer
         for i in range(1, len(self.layers)):
 
             # Calculate the dot product of the input and the weights of the current layer
             # Add the bias to the dot product
-            z = np.dot(self.weights[i], results[i-1]) + self.biases[i]
+            z = np.dot(self.weights[i], h_list[i-1]) + self.biases[i]
+
+            z_list.append(z)
 
             # Apply the activation function to the result
-            h = self.activation[i](z)
+            h = self.activation(z)
 
-            # Append the result to the list of results
-            results.append(h)
+            h_list.append(h)
 
         # Return the output of the MLP
-        return results
+        return h_list, z_list
+
+
+    ### Help funktion for Backpropagation
+
+    def mse(self, y_pred: np.ndarray, y_true: np.ndarray):
+        """
+        Mean Squared Error (MSE) loss function
+        :param np.ndarray y_pred: predicted output
+        :param np.ndarray y_true: target output
+        :return: MSE loss
+        """
+        sum = 0
+        for i in range(len(y_pred)):
+            sum += (y_pred[i] - y_true[i]) ** 2
+        return sum / y_pred.size
     
-    def forward(self, x: np.ndarray) -> np.ndarray:
+    def mse_derivative(self, y_pred: np.ndarray, y_true: np.ndarray):
         """
-        Forward pass through the MLP
-        :param np.ndarray x: input to the MLP
-        :return: output of the MLP
+        Derivative of the Mean Squared Error (MSE) loss function
+        :param np.ndarray y_pred: predicted output
+        :param np.ndarray y_true: target output
+        :return: derivative of the MSE loss
         """
-        # Loop through each layer
-        for i in range(1, len(self.layers)):
-            # Calculate the dot product of the input and the weights of the current layer
-            # Add the bias to the dot product
-            z = np.dot(self.weights[i], x) + self.biases[i]
-
-            # Apply the activation function to the result
-            x = self.activation[i](z)
-
-        # Return the output of the MLP
-        return x
+        return 2 * (y_pred - y_true) / y_true.size
 
 
-    def sigmoid(x):
-        """
-        Sigmoid activation function
-        :param x: input value
-        :return: output of sigmoid function
-        """
-        return 1 / (1 + np.exp(-x))
 
-    def relu(x):
+    ### Backpropagation
+
+    def backpropagation(self, y_pred: np.ndarray, y_true: np.ndarray, learning_rate: float, h_list: list, z_list: list):
         """
-        ReLU activation function
-        :param x: input value
-        :return: output of ReLU function
+        Backpropagation algorithm to train the MLP
+        :param np.ndarray y_pred: predicted output
+        :param np.ndarray y_true: target output
+        :param float learning_rate: learning rate
+        :param list h_list: list of results for each layer
+        :param list z_list: list of results for each layer before activation
         """
-        return np.maximum(0, x)
+
+        delta = [None] * len(self.layers)
+        delta[len(self.layers) - 1] = (self.mse_derivative(y_pred, y_true).reshape(-1, 1) * self.activation_derivative(z_list[len(self.layers) - 1]).reshape(-1, 1))
+
+        for l in range(len(self.layers) - 1, 0, -1):
+
+            delta[l - 1] = (np.dot(self.weights[l].T, delta[l]) * self.activation_derivative(z_list[l - 1]))
+            
+        
+        for l in range(1, len(self.layers)):
+            
+            self.weights[l] -= learning_rate * np.dot(delta[l], (h_list[l - 1]).T)
+            self.biases[l] -= learning_rate * delta[l]
+            
