@@ -1,4 +1,5 @@
 import numpy as np
+import forwardResult as fr
 
 class MLP:
 
@@ -81,7 +82,8 @@ class MLP:
             h_list.append(h)
 
         # Return the output of the MLP
-        return h_list, z_list
+        result = fr.forwardResult(h_list, z_list)
+        return result
 
 
     ### Help funktion for Backpropagation
@@ -111,7 +113,7 @@ class MLP:
 
     ### Backpropagation
 
-    def backpropagation(self, y_pred: np.ndarray, y_true: np.ndarray, learning_rate: float, h_list: list, z_list: list):
+    def backpropagation(self, fres: fr.forwardResult, learning_rate: float):
         """
         Backpropagation algorithm to train the MLP
         :param np.ndarray y_pred: predicted output
@@ -120,6 +122,11 @@ class MLP:
         :param list h_list: list of results for each layer
         :param list z_list: list of results for each layer before activation
         """
+
+        y_pred = fres.get_y_pred()
+        y_true = fres.get_y_true()
+        h_list = fres.get_h_list()
+        z_list = fres.get_z_list()
 
         # Initialize the delta with None for each layer
         delta = [None] * len(self.layers)

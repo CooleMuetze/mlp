@@ -15,14 +15,16 @@ for data in TrainingData:
     x = np.array([data[0], data[1]]).reshape(-1, 1)
     y = np.array(data[2]).reshape(-1, 1)
     output = mlp.forward(x)
-    print(f"Input: {x.flatten()} Output: {output[0][-1].flatten()} Expected: {y.flatten()}")
+    output.set_y_true(y)
+    print(f"Input: {output.get_input().flatten()} Output: {output.get_y_pred().flatten()} Expected: {output.get_y_true().flatten()} Loss: {output.get_loss()}")
 
 for i in range(50000):
     for data in TrainingData:
         x = np.array([data[0], data[1]]).reshape(-1, 1)
         y = np.array(data[2]).reshape(-1, 1)
         output = mlp.forward(x)
-        mlp.backpropagation(output[0][-1], y, 0.1, output[0], output[1])
+        output.set_y_true(y)
+        mlp.backpropagation(output, 0.1)
 
 
 print("Post Training")
@@ -30,4 +32,5 @@ for data in TrainingData:
     x = np.array([data[0], data[1]]).reshape(-1, 1)
     y = np.array(data[2]).reshape(-1, 1)
     output = mlp.forward(x)
-    print(f"Input: {x.flatten()} Output: {output[0][-1].flatten()} Expected: {y.flatten()}")
+    output.set_y_true(y)
+    print(f"Input: {output.get_input().flatten()} Output: {output.get_y_pred().flatten()} Expected: {output.get_y_true().flatten()} Loss: {output.get_loss()}")
