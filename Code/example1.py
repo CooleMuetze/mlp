@@ -1,40 +1,34 @@
 from MLP import MLP
-from functions import *
+from ActivatonFunction import *
 import numpy as np
 
 # Define the layers and activation functions
 layers = [2, 2, 1]
-activation = noFunction
-activation_derivative = noFunction_derivative
+activation = relu
 
 # Create an MLP with the specified layers and activation functions
-mlp = MLP(layers, activation, activation_derivative)
+mlp = MLP(layers, activation)
 
 # Input
-x = np.array([2, 4])
+x = np.array([2, 4]).reshape(-1, 1)
 
-# Output
+# Output (Zielwert entsprechend der ReLU-Ausgabe)
 y = np.array([8])
 
-# Perform a forward pass through the
-# MLP and print the output
-
+# Forward pass (ausprobieren)
 output = mlp.forward(x)
-print(output)
-print(output[1][len(layers)-1])
-first = output[1][len(layers)-1]
+print("Initial output:", output[0][-1])
+first = output[0][-1]
 print("-----------------")
 
-
-
-for i in range(150):
+# Training loop
+for i in range(1000):
     output = mlp.forward(x)
-    print(output[1][len(layers)-1])
-    mlp.backpropagation(output[0][-1:], y, 0.001, output[0], output[1])
+    print(f"Iteration {i}: {output[0][-1]}")
+    mlp.backpropagation(output[0][-1], y, 0.01, output[0], output[1])  # Lernrate auf 0.1 setzen
 
-
+# Final output
 output = mlp.forward(x)
 print("-----------------")
 print("First answer: ", first)
-print("Last answer: ", output[1][len(layers)-1])
-
+print("Last answer: ", output[0][-1])
