@@ -121,15 +121,18 @@ class MLP:
         :param list z_list: list of results for each layer before activation
         """
 
+        # Initialize the delta with None for each layer
         delta = [None] * len(self.layers)
+
+        # Calculate the delta for the last layer by multiplying the derivative of the loss function with the derivative of the activation function
         delta[len(self.layers) - 1] = (self.mse_derivative(y_pred, y_true).reshape(-1, 1) * self.activation.derivative(z_list[len(self.layers) - 1]).reshape(-1, 1))
 
+        # Loop through each layer in reverse order to calculate the delta for each layer starting from the second last layer
         for l in range(len(self.layers) - 1, 0, -1):
             delta[l - 1] = (np.dot(self.weights[l].T, delta[l]) * self.activation.derivative(z_list[l - 1]))
             
-        
+        # loop through each layer and update the weights and biases accordingly
         for l in range(1, len(self.layers)):
-            
             self.weights[l] -= learning_rate * np.dot(delta[l], (h_list[l - 1]).T)
             self.biases[l] -= learning_rate * delta[l]
             
