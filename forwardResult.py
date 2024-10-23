@@ -1,4 +1,6 @@
 
+import numpy as np
+
 class forwardResult:
 
     def __init__(self, h_list, z_list):
@@ -61,3 +63,10 @@ class forwardResult:
         for i in range(len(self.get_y_pred())):
             sum += (self.get_y_pred()[i] - self.y_true[i]) ** 2
         return sum / self.get_y_pred().size
+    
+    def is_correct(self):
+        """
+        Check if the prediction is correct
+        :return: True if the prediction is correct, False otherwise
+        """
+        return np.array_equal(np.round(self.get_y_pred()), self.y_true)

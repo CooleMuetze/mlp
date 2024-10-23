@@ -113,7 +113,7 @@ class MLP:
 
     ### Backpropagation
 
-    def backpropagation(self, fres: fr.forwardResult, learning_rate: float):
+    def backpropagation(self, fres: fr.forwardResult, learning_rate: float, target: np.ndarray=None):
         """
         Backpropagation algorithm to train the MLP
         :param np.ndarray y_pred: predicted output
@@ -123,8 +123,12 @@ class MLP:
         :param list z_list: list of results for each layer before activation
         """
 
+        if target is not None:
+            y_true = target
+        else:
+            y_true = fres.get_y_true()
+
         y_pred = fres.get_y_pred()
-        y_true = fres.get_y_true()
         h_list = fres.get_h_list()
         z_list = fres.get_z_list()
 
