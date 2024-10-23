@@ -31,10 +31,16 @@ python -m example.simple.example2
 Please ensure you are in the root directory of the project when running the examples.
 
 ## MNIST Example
-The project includes an example using the MNIST dataset, where you can draw your own digits and see how well the model recognizes them. Please note that the recognition may not be optimal, as MNIST is designed for a specific style of handwriting that may not match your own.
+The project includes an example using the MNIST dataset, where you can draw your own digits and see how well the model recognizes them.
+> **Note:** The recognition may not be optimal, as MNIST is designed for a specific style of handwriting that may not match your own.
+
+The uploaded model achieves an accuracy of 92% on the test datasets.
 
 ## Disclaimer
 The primary objective of this project is to understand the mathematics behind MLP and Backward Propagation. It is not optimized for performance or accuracy.
 
 ## Conclusion
-We hope this project helps you gain a deeper understanding of the mathematical concepts behind neural networks. Happy learning!
+I hope this project helps you gain a deeper understanding of the mathematical concepts behind neural networks.
+
+## About the Author
+This project was created by me, Leonard Grün. While working on this project, I am studying Business Informatics at the Karlsruhe Institute of Technology (KIT).
